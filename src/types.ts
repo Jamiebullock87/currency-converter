@@ -11,3 +11,10 @@ export interface Currency {
     decimal_mark: string,
     thousands_separator: string
 }
+
+export interface CurrencyHistory {
+    amount: number,
+    from: string,
+    value: number,
+    to: string
+}

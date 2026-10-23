@@ -4,7 +4,7 @@ export interface ConvertCurrencyParams {
     amount: number;
 }
 
-export async function convertCurrencies(params: ConvertCurrencyParams): Promise<number> {
+export async function convertCurrencies(params: ConvertCurrencyParams): Promise<object> {
     try {
         const res = await fetch('http://localhost:5174/api/convert', {
             method: 'POST',
@@ -18,14 +18,9 @@ export async function convertCurrencies(params: ConvertCurrencyParams): Promise<
             throw new Error(`request badly formed`);
         }
 
-        const data = await res.json();
-        const value = data?.response?.value;
+        const data = await res.json(); 
 
-        if (typeof value !== 'number') {
-            throw new Error('Error converting currencies');
-        }
-
-        return value;
+        return data?.response;
     } catch (error) {
         // dont pass a detailed error to the user - in practice it would be good to log it for dev
         throw new Error('Error converting currencies');

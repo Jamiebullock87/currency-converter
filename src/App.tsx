@@ -2,14 +2,15 @@ import { useEffect, useState } from 'react';
 import { InputWrapper } from "@/components/input-wrapper"
 import { fetchCurrencies } from '@/lib/fetch-currencies';
 import { convertCurrencies } from '@/lib/convert-currencies';
-import type { Currency } from '@/types';
+import type { Currency, CurrencyHistory } from '@/types';
 
 function App() {
     const [currencyList, setCurrencyList] = useState<Currency[]>([]);
     const [amount, setAmount] = useState('');
     const [fromCode, setFromCode] = useState('');
     const [toCode, setToCode] = useState('');
-    const [result, setResult] = useState('');
+    const [result, setResult] = useState(0);
+    const [currencyHistory, setCurrencyHistory] = useState<CurrencyHistory[]>([]);
 
     useEffect(() => {
         // do this call in here and pass it down via props so the api call is only made once
@@ -21,15 +22,37 @@ function App() {
 
     function handleConvert() {
         convertCurrencies({ from: fromCode, to: toCode, amount: parseFloat(amount) })
-            .then((value) => {
+            .then((response) => {
                 // set the result to state so it can be passed down via props
-                setResult(String(value));
+                setResult(response.value);
+
+                handleHistory(response);
+                
+                console.log('response', response);
             })
             .catch(() => {
                 // again hide the actual error response from users, but in reality would log err somewhere
                 console.error('error converting the currencies');
             })
     }
+
+    function handleHistory(response: any) {
+        const historyItem = [response, ...currencyHistory];
+
+        if (currencyHistory.length < 5) {
+            setCurrencyHistory(historyItem);
+        } else {
+            historyItem.pop();
+            setCurrencyHistory(historyItem);
+        }
+
+
+        
+    }
+
+    
+
+    
 
     return (
         <>
@@ -56,6 +79,27 @@ function App() {
                 />
             </section>
             <button className="w-full max-w-full rounded-md px-8 py-4 bg-sky-500 text-white font-bold sm:w-auto cursor-pointer" onClick={handleConvert}>Convert Currency</button>
+
+            <section className="w-full max-w-full px-8 py-4">
+                <h3>History</h3>
+                <div className="grid grid-cols-4">
+                    <p>From Currency</p>
+                    <p>From Amount</p>
+                    <p>To Currency</p>
+                    <p>To Amount</p>
+                </div>
+                {currencyHistory.map((item, key) => {
+                    return (
+                        <div key={key} className="grid grid-cols-4 gap-4">
+                            <p>{item.from}</p>
+                            <p>{item.amount}</p>
+                            <p>{item.to}</p>
+                            <p>{item.value}</p>
+                        </div>
+                    )
+                })}
+
+            </section>
         </main>
         </>
     )
